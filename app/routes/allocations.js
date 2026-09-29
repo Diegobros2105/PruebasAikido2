@@ -2,6 +2,7 @@ const AllocationsDAO = require("../data/allocations-dao").AllocationsDAO;
 const {
     environmentalScripts
 } = require("../../config/config");
+const ESAPI = require("node-esapi");
 
 function AllocationsHandler(db) {
     "use strict";
@@ -22,9 +23,15 @@ function AllocationsHandler(db) {
 
         allocationsDAO.getByUserIdAndThreshold(userId, threshold, (err, allocations) => {
             if (err) return next(err);
+            // Sanitize firstName and lastName for all allocations to prevent stored XSS
+            const sanitizedAllocations = allocations.map(allocation => ({
+                ...allocation,
+                firstName: allocation.firstName ? ESAPI.encoder().encodeForHTML(allocation.firstName) : "",
+                lastName: allocation.lastName ? ESAPI.encoder().encodeForHTML(allocation.lastName) : ""
+            }));
             return res.render("allocations", {
                 userId,
-                allocations,
+                allocations: sanitizedAllocations,
                 environmentalScripts
             });
         });

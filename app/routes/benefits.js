@@ -4,6 +4,7 @@ const {
 const {
     environmentalScripts
 } = require("../../config/config");
+const ESAPI = require("node-esapi");
 
 function BenefitsHandler(db) {
     "use strict";
@@ -16,8 +17,15 @@ function BenefitsHandler(db) {
 
             if (error) return next(error);
 
+            // Sanitize firstName and lastName for all users to prevent stored XSS
+            const sanitizedUsers = users.map(user => ({
+                ...user,
+                firstName: user.firstName ? ESAPI.encoder().encodeForHTML(user.firstName) : "",
+                lastName: user.lastName ? ESAPI.encoder().encodeForHTML(user.lastName) : ""
+            }));
+
             return res.render("benefits", {
-                users,
+                users: sanitizedUsers,
                 user: {
                     isAdmin: true
                 },
@@ -39,8 +47,15 @@ function BenefitsHandler(db) {
             benefitsDAO.getAllNonAdminUsers((error, users) => {
                 if (error) return next(error);
 
+                // Sanitize firstName and lastName for all users to prevent stored XSS
+                const sanitizedUsers = users.map(user => ({
+                    ...user,
+                    firstName: user.firstName ? ESAPI.encoder().encodeForHTML(user.firstName) : "",
+                    lastName: user.lastName ? ESAPI.encoder().encodeForHTML(user.lastName) : ""
+                }));
+
                 const data = {
-                    users,
+                    users: sanitizedUsers,
                     user: {
                         isAdmin: true
                     },

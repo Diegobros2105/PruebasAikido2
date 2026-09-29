@@ -3,6 +3,7 @@ const AllocationsDAO = require("../data/allocations-dao").AllocationsDAO;
 const {
     environmentalScripts
 } = require("../../config/config");
+const ESAPI = require("node-esapi");
 
 /* The SessionHandler must be constructed with a connected db */
 function SessionHandler(db) {
@@ -235,6 +236,9 @@ function SessionHandler(db) {
                         req.session.userId = user._id;
                         // Set userId property. Required for left nav menu links
                         user.userId = user._id;
+                        // Sanitize firstName and lastName to prevent stored XSS
+                        user.firstName = user.firstName ? ESAPI.encoder().encodeForHTML(user.firstName) : "";
+                        user.lastName = user.lastName ? ESAPI.encoder().encodeForHTML(user.lastName) : "";
 
                         return res.render("dashboard", {
                             ...user,
@@ -266,6 +270,9 @@ function SessionHandler(db) {
         userDAO.getUserById(userId, (err, doc) => {
             if (err) return next(err);
             doc.userId = userId;
+            // Sanitize firstName and lastName to prevent stored XSS
+            doc.firstName = doc.firstName ? ESAPI.encoder().encodeForHTML(doc.firstName) : "";
+            doc.lastName = doc.lastName ? ESAPI.encoder().encodeForHTML(doc.lastName) : "";
             return res.render("dashboard", {
                 ...doc,
                 environmentalScripts
