@@ -50,13 +50,27 @@ function ProfileHandler(db) {
         } = req.body;
 
         // Fix for Section: ReDoS attack
-        // The following regexPattern that is used to validate the bankRouting number is insecure and vulnerable to
-        // catastrophic backtracking which means that specific type of input may cause it to consume all CPU resources
-        // with an exponential time until it completes
-        // --
+        // Validate input length before regex evaluation to prevent ReDoS attacks
+        // Bank routing numbers are typically 9 digits plus the # suffix, so 20 characters is a safe upper bound
+        if (!bankRouting || typeof bankRouting !== 'string' || bankRouting.length > 20) {
+            const firstNameSafeString = firstName;
+            return res.render("profile", {
+                updateError: "Bank Routing number does not comply with requirements for format specified",
+                firstNameSafeString,
+                lastName,
+                ssn,
+                dob,
+                address,
+                bankAcc,
+                bankRouting,
+                environmentalScripts
+            });
+        }
+
+        // Use a safe regex pattern without nested quantifiers to prevent catastrophic backtracking
         // The Fix: Instead of using greedy quantifiers the same regex will work if we omit the second quantifier +
         // const regexPattern = /([0-9]+)\#/;
-        const regexPattern = /([0-9]+)+\#/;
+        const regexPattern = /^[0-9]+\#$/;
         // Allow only numbers with a suffix of the letter #, for example: 'XXXXXX#'
         const testComplyWithRequirements = regexPattern.test(bankRouting);
         // if the regex test fails we do not allow saving
