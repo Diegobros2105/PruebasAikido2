@@ -142,6 +142,8 @@ function SessionHandler(db) {
         const LNAME_RE = /^.{1,100}$/;
         const EMAIL_RE = /^[\S]+@[\S]+\.[\S]+$/;
         const PASS_RE = /^.{1,20}$/;
+        // Fix for A3 - XSS - Reject HTML/script tags in names
+        const HTML_PATTERN = /<|>|&lt;|&gt;|&#|javascript:|onerror=|onload=/i;
         /*
         //Fix for A2-2 - Broken Authentication -  requires stronger password
         //(at least 8 characters with numbers and both lowercase and uppercase letters.)
@@ -164,8 +166,18 @@ function SessionHandler(db) {
             errors.firstNameError = "Invalid first name.";
             return false;
         }
+        // Fix for A3 - XSS - Reject HTML/script content in first name
+        if (HTML_PATTERN.test(firstName)) {
+            errors.firstNameError = "First name contains invalid characters.";
+            return false;
+        }
         if (!LNAME_RE.test(lastName)) {
             errors.lastNameError = "Invalid last name.";
+            return false;
+        }
+        // Fix for A3 - XSS - Reject HTML/script content in last name
+        if (HTML_PATTERN.test(lastName)) {
+            errors.lastNameError = "Last name contains invalid characters.";
             return false;
         }
         if (!PASS_RE.test(password)) {
