@@ -49,6 +49,38 @@ function ProfileHandler(db) {
             bankRouting
         } = req.body;
 
+        // Fix for A3 - XSS - Reject HTML/script tags in names
+        const HTML_PATTERN = /<|>|&lt;|&gt;|&#|javascript:|onerror=|onload=/i;
+        
+        // Validate firstName and lastName for XSS attempts
+        if (HTML_PATTERN.test(firstName)) {
+            return res.render("profile", {
+                updateError: "First name contains invalid characters.",
+                firstName,
+                lastName,
+                ssn,
+                dob,
+                address,
+                bankAcc,
+                bankRouting,
+                environmentalScripts
+            });
+        }
+        
+        if (HTML_PATTERN.test(lastName)) {
+            return res.render("profile", {
+                updateError: "Last name contains invalid characters.",
+                firstName,
+                lastName,
+                ssn,
+                dob,
+                address,
+                bankAcc,
+                bankRouting,
+                environmentalScripts
+            });
+        }
+
         // Fix for Section: ReDoS attack
         // The following regexPattern that is used to validate the bankRouting number is insecure and vulnerable to
         // catastrophic backtracking which means that specific type of input may cause it to consume all CPU resources
