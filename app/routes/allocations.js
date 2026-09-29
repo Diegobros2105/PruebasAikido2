@@ -1,3 +1,8 @@
+// Lab: shift lines 1/5
+// Lab: shift lines 2/5
+// Lab: shift lines 3/5
+// Lab: shift lines 4/5
+// Lab: shift lines 5/5
 const AllocationsDAO = require("../data/allocations-dao").AllocationsDAO;
 const {
     environmentalScripts
