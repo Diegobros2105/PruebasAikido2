@@ -30,6 +30,11 @@ function ProfileHandler(db) {
             // the context of a URL in a link header
             // doc.website = ESAPI.encoder().encodeForURL(doc.website)
 
+            // Sanitize firstName and lastName to prevent stored XSS
+            doc.firstName = doc.firstName ? ESAPI.encoder().encodeForHTML(doc.firstName) : "";
+            doc.lastName = doc.lastName ? ESAPI.encoder().encodeForHTML(doc.lastName) : "";
+            doc.firstNameSafeString = doc.firstName;
+
             return res.render("profile", {
                 ...doc,
                 environmentalScripts
@@ -39,7 +44,7 @@ function ProfileHandler(db) {
 
     this.handleProfileUpdate = (req, res, next) => {
 
-        const {
+        let {
             firstName,
             lastName,
             ssn,
@@ -48,6 +53,10 @@ function ProfileHandler(db) {
             bankAcc,
             bankRouting
         } = req.body;
+
+        // Sanitize firstName and lastName to prevent stored XSS
+        firstName = firstName ? ESAPI.encoder().encodeForHTML(firstName) : "";
+        lastName = lastName ? ESAPI.encoder().encodeForHTML(lastName) : "";
 
         // Fix for Section: ReDoS attack
         // The following regexPattern that is used to validate the bankRouting number is insecure and vulnerable to
@@ -96,6 +105,7 @@ function ProfileHandler(db) {
                 //firstName = firstName.trim();
                 user.updateSuccess = true;
                 user.userId = userId;
+                user.firstNameSafeString = user.firstName;
 
                 return res.render("profile", {
                     ...user,

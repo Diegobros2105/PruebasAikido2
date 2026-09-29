@@ -2,6 +2,7 @@ const ContributionsDAO = require("../data/contributions-dao").ContributionsDAO;
 const {
     environmentalScripts
 } = require("../../config/config");
+const ESAPI = require("node-esapi");
 
 /* The ContributionsHandler must be constructed with a connected db */
 function ContributionsHandler(db) {
@@ -18,6 +19,9 @@ function ContributionsHandler(db) {
             if (error) return next(error);
 
             contrib.userId = userId; //set for nav menu items
+            // Sanitize firstName and lastName to prevent stored XSS
+            contrib.firstName = contrib.firstName ? ESAPI.encoder().encodeForHTML(contrib.firstName) : "";
+            contrib.lastName = contrib.lastName ? ESAPI.encoder().encodeForHTML(contrib.lastName) : "";
             return res.render("contributions", {
                 ...contrib,
                 environmentalScripts
@@ -67,6 +71,9 @@ function ContributionsHandler(db) {
             if (err) return next(err);
 
             contributions.updateSuccess = true;
+            // Sanitize firstName and lastName to prevent stored XSS
+            contributions.firstName = contributions.firstName ? ESAPI.encoder().encodeForHTML(contributions.firstName) : "";
+            contributions.lastName = contributions.lastName ? ESAPI.encoder().encodeForHTML(contributions.lastName) : "";
             return res.render("contributions", {
                 ...contributions,
                 environmentalScripts
