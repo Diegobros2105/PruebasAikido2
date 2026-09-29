@@ -4,7 +4,7 @@ const BenefitsHandler = require("./benefits");
 const ContributionsHandler = require("./contributions");
 const AllocationsHandler = require("./allocations");
 const MemosHandler = require("./memos");
-const ResearchHandler = require("./research");
+const ResearchHandler = require("./research-handler");
 const tutorialRouter = require("./tutorial");
 const ErrorHandler = require("./error").errorHandler;
 
